@@ -1,0 +1,35 @@
+name: Package C++ Notes Zip
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "cpp-notes/**"
+      - .github/workflows/package-cpp-notes.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: package-cpp-notes
+  cancel-in-progress: true
+
+jobs:
+  build-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create zip archive of notes
+        run: zip -r cpp-notes-latest.zip cpp-notes -x "*.DS_Store"
+
+      - name: Publish rolling release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: cpp-notes-latest
+          name: Latest C++ Notes Archive
+          body: "Automatically built from `cpp-notes/` on `main` (`${{ github.sha }}`)."
+          files: cpp-notes-latest.zip
+          make_latest: false
